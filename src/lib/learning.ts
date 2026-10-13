@@ -19,6 +19,7 @@ export const copy = {
  selectLetters:text('Choose your letters','अक्षर चुनें','اختر حروفك','অক্ষর বাছুন','Elige tus letras'), print:text('Print worksheet','वर्कशीट प्रिंट करें','اطبع ورقة التدريب','অনুশীলনপত্র প্রিন্ট করুন','Imprimir hoja'), trace:text('Trace, then write on your own','पहले ऊपर लिखें, फिर खुद लिखें','تتبّع الحروف ثم اكتب بنفسك','প্রথমে অনুসরণ করুন, তারপর নিজে লিখুন','Repasa y luego escribe por tu cuenta'), name:text('Name','नाम','الاسم','নাম','Nombre'), date:text('Date','तारीख़','التاريخ','তারিখ','Fecha'), badges:text('Your badges','आपके बैज','شاراتك','আপনার ব্যাজ','Tus insignias'), history:text('Streak history','लगातार अभ्यास का इतिहास','سجلّ أيام التعلّم','শেখার ইতিহাস','Historial de rachas'), settings:text('Native language','आपकी भाषा','لغتك الأم','আপনার ভাষা','Idioma nativo'), weekBadge:text('Week one explorer','पहले सप्ताह के खोजी','مستكشف الأسبوع الأول','প্রথম সপ্তাহের অভিযাত্রী','Explorador de la primera semana'), streakBadge:text('Seven-day spark','सात दिन की चमक','شرارة سبعة أيام','সাত দিনের আলো','Chispa de siete días'), badgeLocked:text('Keep learning to unlock','सीखते रहें और पाएँ','تابع التعلّم لفتحها','শিখে যান, অর্জন করুন','Sigue aprendiendo para desbloquear'), saved:text('Your progress stays on this device','आपकी प्रगति इस डिवाइस पर रहती है','يبقى تقدّمك على هذا الجهاز','আপনার অগ্রগতি এই ডিভাইসে থাকে','Tu progreso se guarda en este dispositivo'), goal:text('Small steps. Real progress.','छोटे कदम। असली प्रगति।','خطوات صغيرة. تقدّم حقيقي.','ছোট পদক্ষেপ। সত্যিকারের উন্নতি।','Pequeños pasos. Progreso real.'), minutes:text('min','मिनट','دقائق','মিনিট','min'), voiceNote:text('Speech recognition needs an internet connection.','आवाज़ पहचान के लिए इंटरनेट चाहिए।','التعرّف على الكلام يحتاج اتصالًا بالإنترنت.','কথা শনাক্ত করতে ইন্টারনেট দরকার।','El reconocimiento de voz necesita internet.'), dayLimit:text('Finish the previous lesson to unlock this day.','इस दिन को खोलने के लिए पिछला पाठ पूरा करें।','أكمل الدرس السابق لفتح هذا اليوم.','এই দিন খুলতে আগের পাঠ শেষ করুন।','Completa la lección anterior para desbloquear este día.'),
 };
 export type Letter = {glyph:string;name:string;sound:string;word:string;roman:string;meaning:Text;};
+const en5=(s:string)=>text(s,s,s,s,s);
 export const letters:Letter[] = [
  {glyph:'ا',name:'Alif',sound:'a / ā',word:'انار',roman:'anār',meaning:text('Pomegranate','अनार','رُمّان','ডালিম','Granada')},
  {glyph:'ب',name:'Be',sound:'b',word:'بکری',roman:'bakrī',meaning:text('Goat','बकरी','ماعز','ছাগল','Cabra')},
@@ -27,8 +28,39 @@ export const letters:Letter[] = [
  {glyph:'ٹ',name:'Tte',sound:'ṭ',word:'ٹوپی',roman:'ṭopī',meaning:text('Hat','टोपी','قبعة','টুপি','Sombrero')},
  {glyph:'ث',name:'Se',sound:'s',word:'ثمر',roman:'samar',meaning:text('Fruit / result','फल / परिणाम','ثمرة / نتيجة','ফল / ফলাফল','Fruto / resultado')},
  {glyph:'ج',name:'Jeem',sound:'j',word:'جہاز',roman:'jahāz',meaning:text('Ship / airplane','जहाज़','سفينة / طائرة','জাহাজ / বিমান','Barco / avión')},
+ {glyph:'چ',name:'Che',sound:'ch',word:'چاند',roman:'chānd',meaning:en5('Moon')},
+ {glyph:'ح',name:'Baṛī he',sound:'h',word:'حلوہ',roman:'halwā',meaning:en5('Sweet')},
+ {glyph:'خ',name:'Khe',sound:'kh',word:'خرگوش',roman:'khargosh',meaning:en5('Rabbit')},
+ {glyph:'د',name:'Daal',sound:'d',word:'دروازہ',roman:'darwāza',meaning:en5('Door')},
+ {glyph:'ڈ',name:'Ddaal',sound:'ḍ',word:'ڈبہ',roman:'ḍibba',meaning:en5('Box')},
+ {glyph:'ذ',name:'Zaal',sound:'z',word:'ذرہ',roman:'zarra',meaning:en5('Particle')},
+ {glyph:'ر',name:'Re',sound:'r',word:'روٹی',roman:'roṭī',meaning:en5('Bread')},
+ {glyph:'ڑ',name:'Rre',sound:'ṛ',word:'پہاڑ',roman:'pahāṛ',meaning:en5('Mountain')},
+ {glyph:'ز',name:'Ze',sound:'z',word:'زمین',roman:'zamīn',meaning:en5('Land')},
+ {glyph:'ژ',name:'Zhe',sound:'zh',word:'ژالہ',roman:'zhāla',meaning:en5('Hail')},
+ {glyph:'س',name:'Seen',sound:'s',word:'سیب',roman:'seb',meaning:en5('Apple')},
+ {glyph:'ش',name:'Sheen',sound:'sh',word:'شیر',roman:'sher',meaning:en5('Lion')},
+ {glyph:'ص',name:'Suaad',sound:'s',word:'صابن',roman:'sābun',meaning:en5('Soap')},
+ {glyph:'ض',name:'Zuaad',sound:'z',word:'ضرب',roman:'zarb',meaning:en5('Strike')},
+ {glyph:'ط',name:'Toe',sound:'t',word:'طوطا',roman:'ṭoṭā',meaning:en5('Parrot')},
+ {glyph:'ظ',name:'Zoe',sound:'z',word:'ظرف',roman:'zarf',meaning:en5('Vessel')},
+ {glyph:'ع',name:'Ain',sound:'ʿa',word:'عینک',roman:'ainak',meaning:en5('Glasses')},
+ {glyph:'غ',name:'Ghain',sound:'gh',word:'غبارہ',roman:'ghubāra',meaning:en5('Balloon')},
+ {glyph:'ف',name:'Fe',sound:'f',word:'فیل',roman:'fīl',meaning:en5('Elephant')},
+ {glyph:'ق',name:'Qaaf',sound:'q',word:'قلم',roman:'qalam',meaning:en5('Pen')},
+ {glyph:'ک',name:'Kaaf',sound:'k',word:'کتاب',roman:'kitāb',meaning:en5('Book')},
+ {glyph:'گ',name:'Gaaf',sound:'g',word:'گھر',roman:'ghar',meaning:en5('House')},
+ {glyph:'ل',name:'Laam',sound:'l',word:'لڑکا',roman:'laṛkā',meaning:en5('Boy')},
+ {glyph:'م',name:'Meem',sound:'m',word:'مچھلی',roman:'machhlī',meaning:en5('Fish')},
+ {glyph:'ن',name:'Noon',sound:'n',word:'ناک',roman:'nāk',meaning:en5('Nose')},
+ {glyph:'و',name:'Wao',sound:'w / o',word:'وقت',roman:'waqt',meaning:en5('Time')},
+ {glyph:'ہ',name:'He',sound:'h',word:'ہاتھی',roman:'hāthī',meaning:en5('Elephant')},
+ {glyph:'ھ',name:'Do-chashmi he',sound:'h',word:'دودھ',roman:'dūdh',meaning:en5('Milk')},
+ {glyph:'ی',name:'Ye',sound:'y',word:'یاد',roman:'yād',meaning:en5('Memory')},
+ {glyph:'ے',name:'Baṛī ye',sound:'e',word:'چائے',roman:'chāy',meaning:en5('Tea')},
+ {glyph:'ں',name:'Noon ghunna',sound:'ñ',word:'ماں',roman:'māñ',meaning:en5('Mother')},
 ];
-export const lessons = [[0,1],[2,3],[4,5],[6,0],[1,2],[3,4,6]];
+export const lessons = [[0,1,2],[3,4,5],[6,7,8],[9,10,11],[12,13,14],[15,16,17],[18,19,20],[21,22,23],[24,25,26],[27,28,29],[30,31,32],[33,34,35],[36,37]];
 export const sentences = [
  {urdu:'یہ میرا گھر ہے۔',roman:'Yeh merā ghar hai.',meaning:text('This is my home.','यह मेरा घर है।','هذا بيتي.','এটি আমার বাড়ি।','Esta es mi casa.')},
  {urdu:'میں پانی پیتا ہوں۔',roman:'Main pānī pītā hūn.',meaning:text('I drink water.','मैं पानी पीता हूँ।','أنا أشرب الماء.','আমি পানি পান করি।','Yo bebo agua.')},
@@ -69,7 +101,7 @@ export function award(p:Progress,task:string,amount:number,day?:number,date=loca
  return {...p,xp:p.xp+(fresh?amount:0),tasks:fresh?[...p.tasks,task]:p.tasks,completed:isLesson&&!p.completed.includes(day)?[...p.completed,day]:p.completed,dates:isLesson&&!p.dates.includes(date)?[...p.dates,date]:p.dates};
 }
 export function levelFor(xp:number) {return Math.floor(xp/100)+1;}
-export function unlocked(day:number,p:Progress) {return day<=6 && (day===1||p.completed.includes(day-1));}
+export function unlocked(day:number,p:Progress) {return day<=lessons.length && (day===1||p.completed.includes(day-1));}
 export function normalizeWords(s:string) {return s.normalize('NFC').replace(/[\u064B-\u065F\u0670\u0640]/g,'').replace(/ي/g,'ی').replace(/ك/g,'ک').replace(/[^\p{L}\p{N}\s]/gu,'').trim().split(/\s+/).filter(Boolean);}
 export function getLetter(index:number):Letter {const item=letters[index];if(!item)throw new Error('Unknown letter');return item;}
 export function getQuestion(index:number) {const item=questions[index];if(!item)throw new Error('Unknown question');return item;}

@@ -32,7 +32,7 @@ describe('Learning remains usable without optional services',()=>{
   expect(p).toEqual({language:'en',placement:null,xp:50,completed:[1],tasks:['lesson-1'],dates:['2026-10-10']});
  });
  it('filters invalid lesson, task and date entries and non-finite XP',()=>{
-  expect(normalizeProgress({language:'invalid',placement:{},xp:Infinity,completed:[1,1,7,null],tasks:['read-0',null],dates:['2026-10-10','2026-02-31',null]})).toEqual({language:null,placement:null,xp:0,completed:[1],tasks:['read-0'],dates:['2026-10-10']});
+  expect(normalizeProgress({language:'invalid',placement:{},xp:Infinity,completed:[1,1,99,null],tasks:['read-0',null],dates:['2026-10-10','2026-02-31',null]})).toEqual({language:null,placement:null,xp:0,completed:[1],tasks:['read-0'],dates:['2026-10-10']});
  });
  it('handles absent translated content and falls back to English',()=>{
   expect(translate(undefined,'en')).toBe('');expect(translate({en:'Water'},'hi')).toBe('Water');
