@@ -1,7 +1,13 @@
 import {award, localDate, text, type Progress, type Text} from './learning';
 
 export type StorySentence = {urdu:string; roman:string; meaning:Text};
-export type Story = {id:string; titleUrdu:string; title:Text; level:'beginner'|'intermediate'; readingLevel?:number; description:Text; cover:0|1|2|3; sentences:StorySentence[]};
+// A book page: one illustration + a few lines, each line available in Urdu and English.
+export type BookLine = {ur:string; roman:string; en:string};
+export type BookPage = {art:string; lines:BookLine[]};
+export type Story = {id:string; titleUrdu:string; title:Text; level:'beginner'|'intermediate'; readingLevel?:number; description:Text; cover:0|1|2|3; sentences:StorySentence[]; book?:BookPage[]};
+// Stories that carry `book` pages open in the full-page bilingual reader; others use the sentence reader.
+export const bookToSentences = (book:BookPage[]):StorySentence[] => book.flatMap(p=>p.lines.map(l=>({urdu:l.ur,roman:l.roman,meaning:text(l.en,l.en,l.en,l.en,l.en)})));
+export const bookPageTask = (id:string,page:number) => `story:${id}:page:${page}`;
 export const storyCopy = {
  stories:text('Stories','कहानियाँ','القصص','গল্প','Historias'),
  subtitle:text('Little stories. A whole new world.','छोटी कहानियाँ। एक नई दुनिया।','قصص صغيرة. عالم جديد.','ছোট গল্প। এক নতুন জগৎ।','Pequeñas historias. Un mundo nuevo.'),
@@ -19,7 +25,21 @@ export const storyCopy = {
  completedSentences:text('sentences completed','वाक्य पूरे हुए','جمل مكتملة','বাক্য সম্পন্ন','frases completadas'),
 };
 
+// The Tortoise and the Hare — classic Aesop fable (public domain), retold simply in Urdu + English.
+const tortoiseBook:BookPage[] = [
+ {art:'pair',lines:[{ur:'ایک جنگل میں ایک کچھوا اور ایک خرگوش رہتے تھے۔',roman:'Ek jungle mein ek kachhua aur ek khargosh rehte the.',en:'In a jungle lived a tortoise and a hare.'}]},
+ {art:'pair',lines:[{ur:'کچھوا دھیما اور نرم دل تھا۔',roman:'Kachhua dheema aur naram dil tha.',en:'The tortoise was slow and kind.'},{ur:'خرگوش تیز مگر مغرور تھا۔',roman:'Khargosh tez magar maghroor tha.',en:'The hare was fast but proud.'}]},
+ {art:'tease',lines:[{ur:'خرگوش ہمیشہ کچھوے کو چڑاتا تھا۔',roman:'Khargosh hamesha kachhuay ko chirhata tha.',en:'The hare always teased the tortoise.'},{ur:'وہ کہتا، تم بہت سست ہو۔',roman:'Woh kehta, tum bahut sust ho.',en:'He would say, you are very slow.'}]},
+ {art:'startline',lines:[{ur:'ایک دن کچھوے نے کہا، آؤ دوڑ لگائیں۔',roman:'Ek din kachhuay ne kaha, aao daud lagayein.',en:'One day the tortoise said, let us have a race.'},{ur:'خرگوش زور سے ہنسا۔',roman:'Khargosh zor se hansa.',en:'The hare laughed loudly.'}]},
+ {art:'startline',lines:[{ur:'دوڑ شروع ہوئی۔',roman:'Daud shuru hui.',en:'The race began.'},{ur:'خرگوش تیزی سے بہت آگے نکل گیا۔',roman:'Khargosh tezi se bahut aage nikal gaya.',en:'The hare sped far ahead.'}]},
+ {art:'sleep',lines:[{ur:'خرگوش کو یقین تھا کہ وہ جیتے گا۔',roman:'Khargosh ko yaqeen tha ke woh jeetay ga.',en:'The hare was sure he would win.'},{ur:'وہ ایک درخت کے نیچے سو گیا۔',roman:'Woh ek darakht ke neeche so gaya.',en:'He fell asleep under a tree.'}]},
+ {art:'pass',lines:[{ur:'کچھوا آہستہ آہستہ چلتا رہا۔',roman:'Kachhua aahista aahista chalta raha.',en:'The tortoise kept walking slowly.'},{ur:'وہ سوتے خرگوش کے پاس سے گزر گیا۔',roman:'Woh sotay khargosh ke paas se guzar gaya.',en:'He passed the sleeping hare.'}]},
+ {art:'win',lines:[{ur:'کچھوا سب سے پہلے منزل پر پہنچا۔',roman:'Kachhua sab se pehle manzil par pahuncha.',en:'The tortoise reached the finish first.'},{ur:'کچھوا دوڑ جیت گیا!',roman:'Kachhua daud jeet gaya!',en:'The tortoise won the race!'}]},
+ {art:'trophy',lines:[{ur:'محنت اور صبر سے کامیابی ملتی ہے۔',roman:'Mehnat aur sabr se kamyabi milti hai.',en:'Hard work and patience bring success.'}]},
+];
+
 export const stories:Story[] = [
+ {id:'tortoise-and-hare',titleUrdu:'کچھوا اور خرگوش',title:text('The tortoise and the hare','कछुआ और खरगोश','السلحفاة والأرنب','কচ্ছপ ও খরগোশ','La tortuga y la liebre'),level:'beginner',cover:2,description:text('Slow and steady wins the race.','धीरे और लगातार चलने वाला जीतता है।','البطيء الثابت يفوز بالسباق.','ধীর অথচ অবিচল জয়ী হয়।','Lento pero constante gana la carrera.'),book:tortoiseBook,sentences:bookToSentences(tortoiseBook)},
  {id:'thirsty-crow',titleUrdu:'پیاسا کوا',title:text('The thirsty crow','प्यासा कौआ','الغراب العطشان','তৃষ্ণার্ত কাক','El cuervo sediento'),level:'beginner',cover:0,description:text('A clever crow finds a way to drink.','एक समझदार कौआ पानी पीने का उपाय ढूँढता है।','غراب ذكي يجد طريقة للشرب.','এক বুদ্ধিমান কাক পানি পান করার উপায় খুঁজে পায়।','Un cuervo ingenioso encuentra cómo beber.'),sentences:[
   {urdu:'ایک کوا پیاسا تھا۔',roman:'Ek kawwā pyāsā thā.',meaning:text('A crow was thirsty.','एक कौआ प्यासा था।','كان غراب عطشانًا.','একটি কাক তৃষ্ণার্ত ছিল।','Un cuervo tenía sed.')},
   {urdu:'اس نے ایک گھڑا دیکھا۔',roman:'Us ne ek ghaṛā dekhā.',meaning:text('It saw a water jug.','उसने एक घड़ा देखा।','رأى جرّة ماء.','সে একটি কলস দেখল।','Vio una jarra de agua.')},

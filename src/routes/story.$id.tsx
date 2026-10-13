@@ -5,6 +5,7 @@ import {Button} from '@/components/ui/button';
 import {Mascot} from '@/components/alif/shell';
 import {StoryCover} from '@/components/alif/story-cover';
 import {ReadAloudPractice} from '@/components/alif/read-aloud-practice';
+import {BookReader} from '@/components/alif/book-reader';
 import {useProgress,celebrate} from '@/lib/progress';
 import {copy} from '@/lib/learning';
 import {stories,storyCopy,storyTask,sentenceTask,storySentenceXp,completeStorySentence,completedStorySentences,type Story} from '@/lib/stories';
@@ -16,7 +17,7 @@ export const Route=createFileRoute('/story/$id')({
  notFoundComponent:StoryNotFound,
 });
 function StoryNotFound(){const {t}=useProgress();return <div className="story-empty"><h1>{t(storyCopy.noStories)}</h1><Button asChild variant="outline"><Link to="/stories">{t(storyCopy.back)}</Link></Button></div>;}
-function StoryReader(){const story=Route.useLoaderData();if(!story?.sentences?.length)return <StoryNotFound/>;return <Reader key={story.id} story={story}/>;}
+function StoryReader(){const story=Route.useLoaderData();if(!story?.sentences?.length)return <StoryNotFound/>;if(story.book?.length)return <BookReader key={story.id} story={story}/>;return <Reader key={story.id} story={story}/>;}
 function Reader({story}:{story:Story}){
  const {progress,setProgress,t}=useProgress();
  const [index,setIndex]=useState(0);const [finished,setFinished]=useState(false);

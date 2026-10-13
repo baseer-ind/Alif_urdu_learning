@@ -4,9 +4,9 @@ import {stories,completeStorySentence,storyTask,storySentenceXp} from '@/lib/sto
 import {seededAudioTexts} from '@/lib/urdu-tts-content';
 
 describe('Story learning rules',()=>{
- const story=stories[0];if(!story)throw new Error('Missing seeded story');
- it('seeds four beginner stories with ordered Urdu, Roman, and translated meanings',()=>{
-  expect(stories).toHaveLength(4);expect(new Set(stories.map(s=>s.id)).size).toBe(4);
+ const story=stories.find(s=>s.id==='thirsty-crow');if(!story)throw new Error('Missing seeded story');
+ it('seeds beginner stories with ordered Urdu, Roman, and translated meanings',()=>{
+  expect(stories).toHaveLength(5);expect(new Set(stories.map(s=>s.id)).size).toBe(5);
   for(const s of stories){expect(s.level).toBe('beginner');expect(s.sentences.length).toBeGreaterThanOrEqual(6);for(const sentence of s.sentences){expect(sentence.urdu).toMatch(/[\u0600-\u06ff]/);expect(sentence.roman.length).toBeGreaterThan(5);for(const lang of ['en','hi','ar','bn','es'] as const)expect(sentence.meaning[lang].length).toBeGreaterThan(0);}}
  });
  it('awards 20 XP per sentence only once',()=>{
