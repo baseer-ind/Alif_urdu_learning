@@ -1,0 +1,8 @@
+import {createFileRoute,useNavigate} from '@tanstack/react-router';
+import {ArrowRight,CheckCircle2,Globe} from 'lucide-react';
+import {Button} from '@/components/ui/button';
+import {Mascot,PageTitle} from '@/components/alif/shell';
+import {useProgress} from '@/lib/progress';
+import {copy,languages} from '@/lib/learning';
+export const Route=createFileRoute('/welcome')({head:()=>({meta:[{title:'Choose your language — Alif'},{name:'description',content:'Learn Urdu with explanations in English, Hindi, Arabic, Bengali or Spanish.'},{property:'og:title',content:'Choose your language — Alif'},{property:'og:description',content:'Start learning Urdu in your own language.'},{property:'og:type',content:'website'},{name:'twitter:card',content:'summary_large_image'}]}),component:Welcome});
+function Welcome(){const{progress,setProgress,t}=useProgress();const navigate=useNavigate();return <div className="onboarding"><Mascot/><PageTitle title={t(copy.languageTitle)} subtitle={t(copy.languageSub)}/><div className="language-grid">{languages.map(l=><Button key={l.id} variant="outline" className={`language-button ${progress.language===l.id?'selected':''}`} onClick={()=>setProgress(p=>({...p,language:l.id}))}><span className="flag">{l.flag}</span><span>{l.native}</span><span className="language-name">{l.name}</span>{progress.language===l.id&&<CheckCircle2 size={17} className="selection-check"/>}</Button>)}</div><Button variant="learn" size="lg" disabled={!progress.language} onClick={()=>navigate({to:progress.placement?'/':'/placement'})}>{t(copy.next)}<ArrowRight/></Button><p className="onboarding-note"><Globe className="inline" size={13}/> {t(copy.saved)}</p></div>;}
