@@ -46,12 +46,14 @@ Note: the voice is `ur-IN` (Indian Urdu) — the best Google offers for Urdu. To
 native Pakistani-Urdu ear it can lean Hindi. True `ur-PK` needs Azure or human
 recordings, which are a paid/manual step we deliberately did not take.
 
-## 4. (Optional) Accounts / database
+## 4. Accounts
 
-Not needed for v1 — there is no login screen and progress is device-local. The
-Supabase plumbing is dormant. If you add accounts later, set the `SUPABASE_*`
-secrets (see `.env.example`) as Worker secrets, and the `VITE_SUPABASE_*` ones
-at build time.
+v1 has **no accounts and no login** — progress is device-local by design. The
+auth scaffolding has been removed. The only remaining Supabase hook is an
+*optional* server-side cache for cloud narration MP3s (step 3); it stays
+dormant and inline-only unless you set the `SUPABASE_*` secrets, and narration
+works fine without it. Adding real accounts later is a separate feature, not a
+config toggle.
 
 ## 5. Put it on Google Play (PWA → Android app)
 
