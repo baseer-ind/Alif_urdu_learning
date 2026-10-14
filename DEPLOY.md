@@ -28,9 +28,14 @@ npx wrangler deploy --config .output/server/wrangler.json
 ```
 
 Wrangler prints your live URL, e.g. `https://alif-urdu-learning.<you>.workers.dev`.
-Re-run the two build + deploy commands any time to ship an update. (Pushing to
-the connected GitHub branch does **not** auto-deploy anymore — this repo is
-self-hosted now, so deploys are manual unless you add a GitHub Action.)
+Re-run the two build + deploy commands any time to ship an update.
+
+**Or deploy automatically on every push:** this repo already includes
+`.github/workflows/deploy.yml`. Add two secrets in GitHub → Settings → Secrets
+and variables → Actions — `CLOUDFLARE_API_TOKEN` (Cloudflare → My Profile → API
+Tokens → "Edit Cloudflare Workers" template) and `CLOUDFLARE_ACCOUNT_ID`
+(Workers & Pages → Account ID) — and every push to `main` builds and deploys
+for you. No local wrangler needed after that.
 
 ## 3. (Optional) Turn on Google cloud narration
 
@@ -55,19 +60,18 @@ dormant and inline-only unless you set the `SUPABASE_*` secrets, and narration
 works fine without it. Adding real accounts later is a separate feature, not a
 config toggle.
 
-## 5. Put it on Google Play (PWA → Android app)
+## 5. Launch: share the link, people install the PWA
 
-Alif is an installable PWA, so it wraps into an Android app with a Trusted Web
-Activity — no rewrite.
+No app store needed. Once it's live (steps 1–2), the URL *is* the product:
 
-1. Deploy first (steps 1–2) so you have an HTTPS URL.
-2. Generate the Android package from the manifest:
-   ```bash
-   npx @bubblewrap/cli init --manifest https://YOUR_URL/manifest.webmanifest
-   npx @bubblewrap/cli build
-   ```
-3. Upload the resulting `.aab` to the Google Play Console (a one-time $25
-   developer account is required by Google).
+- **Share the URL.** On a phone, the browser offers "Add to Home Screen" /
+  "Install app"; it then opens full-screen with its own icon, like a native
+  app, and works offline after the first visit.
+- **Nicer URL (optional, free):** in the Cloudflare dashboard → your Worker →
+  Settings → Domains & Routes, attach a custom domain or a `*.pages.dev` style
+  route so you can hand out something cleaner than `*.workers.dev`.
+- **To update the app later,** just deploy again (step 2). The service worker
+  picks up the new version automatically on the user's next visit.
 
 ---
 

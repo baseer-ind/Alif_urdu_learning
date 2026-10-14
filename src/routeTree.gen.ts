@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CertificateRouteImport } from './routes/certificate'
 import { Route as PlacementRouteImport } from './routes/placement'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ReadRouteImport } from './routes/read'
 import { Route as RewardsRouteImport } from './routes/rewards'
@@ -35,6 +36,11 @@ const CertificateRoute = CertificateRouteImport.update({
 const PlacementRoute = PlacementRouteImport.update({
   id: '/placement',
   path: '/placement',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileRoute = ProfileRouteImport.update({
@@ -87,6 +93,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/certificate': typeof CertificateRoute
   '/placement': typeof PlacementRoute
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/read': typeof ReadRoute
   '/rewards': typeof RewardsRoute
@@ -101,6 +108,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/certificate': typeof CertificateRoute
   '/placement': typeof PlacementRoute
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/read': typeof ReadRoute
   '/rewards': typeof RewardsRoute
@@ -116,6 +124,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/certificate': typeof CertificateRoute
   '/placement': typeof PlacementRoute
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/read': typeof ReadRoute
   '/rewards': typeof RewardsRoute
@@ -132,6 +141,7 @@ export interface FileRouteTypes {
     | '/'
     | '/certificate'
     | '/placement'
+    | '/privacy'
     | '/profile'
     | '/read'
     | '/rewards'
@@ -146,6 +156,7 @@ export interface FileRouteTypes {
     | '/'
     | '/certificate'
     | '/placement'
+    | '/privacy'
     | '/profile'
     | '/read'
     | '/rewards'
@@ -160,6 +171,7 @@ export interface FileRouteTypes {
     | '/'
     | '/certificate'
     | '/placement'
+    | '/privacy'
     | '/profile'
     | '/read'
     | '/rewards'
@@ -175,6 +187,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CertificateRoute: typeof CertificateRoute
   PlacementRoute: typeof PlacementRoute
+  PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
   ReadRoute: typeof ReadRoute
   RewardsRoute: typeof RewardsRoute
@@ -207,6 +220,13 @@ declare module '@tanstack/react-router' {
       path: '/placement'
       fullPath: '/placement'
       preLoaderRoute: typeof PlacementRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile': {
@@ -279,6 +299,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CertificateRoute: CertificateRoute,
   PlacementRoute: PlacementRoute,
+  PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
   ReadRoute: ReadRoute,
   RewardsRoute: RewardsRoute,
