@@ -61,6 +61,9 @@ export const letters:Letter[] = [
  {glyph:'ں',name:'Noon ghunna',sound:'ñ',word:'ماں',roman:'māñ',meaning:text('Mother','माँ','أمّ','মা','Madre')},
 ];
 export const lessons = [[0,1,2],[3,4,5],[6,7,8],[9,10,11],[12,13,14],[15,16,17],[18,19,20],[21,22,23],[24,25,26],[27,28,29],[30,31,32],[33,34,35],[36,37]];
+// The full challenge runs 30 days: 13 alphabet days (above) plus the joining,
+// vowel-mark, vocabulary and sentence days defined in curriculum.ts.
+export const totalDays = 30;
 export const sentences = [
  {urdu:'یہ میرا گھر ہے۔',roman:'Yeh merā ghar hai.',meaning:text('This is my home.','यह मेरा घर है।','هذا بيتي.','এটি আমার বাড়ি।','Esta es mi casa.')},
  {urdu:'میں پانی پیتا ہوں۔',roman:'Main pānī pītā hūn.',meaning:text('I drink water.','मैं पानी पीता हूँ।','أنا أشرب الماء.','আমি পানি পান করি।','Yo bebo agua.')},
@@ -83,7 +86,7 @@ export function normalizeProgress(value:unknown):Progress {
  const language=languages.find(item=>item.id===p.language)?.id??null;
  const placement=p.placement==='beginner'||p.placement==='intermediate'||p.placement==='expert'?p.placement:null;
  const xp=typeof p.xp==='number'&&Number.isFinite(p.xp)&&p.xp>=0?p.xp:0;
- const completed=Array.isArray(p.completed)?p.completed.filter((day):day is number=>typeof day==='number'&&Number.isInteger(day)&&day>=1&&day<=lessons.length):[];
+ const completed=Array.isArray(p.completed)?p.completed.filter((day):day is number=>typeof day==='number'&&Number.isInteger(day)&&day>=1&&day<=totalDays):[];
  const tasks=Array.isArray(p.tasks)?p.tasks.filter((task):task is string=>typeof task==='string'):[];
  const dates=Array.isArray(p.dates)?p.dates.filter((date):date is string=>typeof date==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(date)&&localDate(new Date(`${date}T12:00:00`))===date):[];
  const avatar=validAvatar(p.avatar);
@@ -103,9 +106,9 @@ export function award(p:Progress,task:string,amount:number,day?:number,date=loca
  return {...p,xp:p.xp+(fresh?amount:0),tasks:fresh?[...p.tasks,task]:p.tasks,completed:isLesson&&!p.completed.includes(day)?[...p.completed,day]:p.completed,dates:isLesson&&!p.dates.includes(date)?[...p.dates,date]:p.dates};
 }
 export function levelFor(xp:number) {return Math.floor(xp/100)+1;}
-export function unlocked(day:number,p:Progress) {return day<=lessons.length && (day===1||p.completed.includes(day-1));}
+export function unlocked(day:number,p:Progress) {return day<=totalDays && (day===1||p.completed.includes(day-1));}
 export const certificateTask='certificate:challenge';
-export function challengeComplete(p:Progress) {return lessons.length>0 && Array.from({length:lessons.length},(_,i)=>i+1).every(day=>p.completed.includes(day));}
+export function challengeComplete(p:Progress) {return Array.from({length:totalDays},(_,i)=>i+1).every(day=>p.completed.includes(day));}
 export function normalizeWords(s:string) {return s.normalize('NFC').replace(/[\u064B-\u065F\u0670\u0640]/g,'').replace(/ي/g,'ی').replace(/ك/g,'ک').replace(/[^\p{L}\p{N}\s]/gu,'').trim().split(/\s+/).filter(Boolean);}
 export function getLetter(index:number):Letter {const item=letters[index];if(!item)throw new Error('Unknown letter');return item;}
 export function getQuestion(index:number) {const item=questions[index];if(!item)throw new Error('Unknown question');return item;}

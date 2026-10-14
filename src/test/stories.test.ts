@@ -1,5 +1,5 @@
 import {describe,it,expect} from 'vitest';
-import {initialProgress,localDate,normalizeWords,compareWords,streak,lessons} from '@/lib/learning';
+import {initialProgress,localDate,normalizeWords,compareWords,streak,totalDays} from '@/lib/learning';
 import {stories,completeStorySentence,storyTask,storySentenceXp,weeklyStories,storyUnlocked,daysUntilStory} from '@/lib/stories';
 import {seededAudioTexts} from '@/lib/urdu-tts-content';
 
@@ -32,7 +32,7 @@ describe('Story learning rules',()=>{
   let p=initialProgress;for(let i=0;i<story.sentences.length;i++)p=completeStorySentence(p,story,i);expect(p.dates).toEqual([localDate()]);
  });
  it('keeps weekly stories locked until the challenge is finished, then releases one per week',()=>{
-  const base={...initialProgress,completed:Array.from({length:lessons.length},(_,i)=>i+1),challengeDate:'2026-10-10'};
+  const base={...initialProgress,completed:Array.from({length:totalDays},(_,i)=>i+1),challengeDate:'2026-10-10'};
   const wk1=weeklyStories.find(s=>s.releaseWeek===1);const wk2=weeklyStories.find(s=>s.releaseWeek===2);if(!wk1||!wk2)throw new Error('Missing weekly stories');
   expect(storyUnlocked(wk1,initialProgress,new Date('2026-10-10T12:00:00'))).toBe(false);
   expect(daysUntilStory(wk1,initialProgress)).toBeNull();

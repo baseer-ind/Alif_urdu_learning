@@ -4,7 +4,7 @@ import {Award,Printer,ArrowLeft,Lock,Star,Zap} from 'lucide-react';
 import {Button} from '@/components/ui/button';
 import {Mascot,PageTitle,Logo} from '@/components/alif/shell';
 import {useProgress,celebrate} from '@/lib/progress';
-import {copy,challengeComplete,certificateTask,lessons,levelFor,localDate} from '@/lib/learning';
+import {copy,challengeComplete,certificateTask,totalDays,levelFor,localDate} from '@/lib/learning';
 import {starsFor} from '@/lib/rewards';
 export const Route=createFileRoute('/certificate')({head:()=>({meta:[{title:'Your Urdu certificate — Alif'},{name:'description',content:'Earn and print your certificate for completing the 30-day Urdu reading challenge with Alif.'},{property:'og:title',content:'Your Urdu certificate — Alif'},{property:'og:description',content:'A printable certificate celebrating your 30-day Urdu journey.'},{property:'og:type',content:'website'},{name:'twitter:card',content:'summary_large_image'}]}),component:Certificate});
 function Certificate(){
@@ -13,7 +13,7 @@ function Certificate(){
  // Stamp the finish date once, the moment the challenge is complete, and celebrate.
  useEffect(()=>{if(complete&&!progress.challengeDate){setProgress(p=>p.challengeDate?p:{...p,challengeDate:localDate(),tasks:p.tasks.includes(certificateTask)?p.tasks:[...p.tasks,certificateTask]});void celebrate();}},[complete,progress.challengeDate,setProgress]);
  if(!progress.language)return <div className="onboarding"><Mascot/><PageTitle title={t(copy.certificateSub)}/><Button asChild variant="learn"><Link to="/welcome">{t(copy.back)}<ArrowLeft/></Link></Button></div>;
- if(!complete){const total=lessons.length;return <div className="certificate-locked"><Mascot/><PageTitle title={t(copy.certificate)} subtitle={t(copy.certificateLocked)}/><div className="certificate-lock-badge"><Lock size={34}/></div><div className="certificate-progress"><div className="progress-track"><span style={{width:`${Math.round((progress.completed.length/total)*100)}%`}}/></div><strong>{progress.completed.length} / {total} {t(copy.day).toLowerCase()}</strong></div><Button asChild variant="learn" size="lg"><Link to="/lesson/$day" params={{day:String(Array.from({length:total},(_,i)=>i+1).find(d=>!progress.completed.includes(d))??total)}}>{t(copy.continue)}<ArrowLeft/></Link></Button></div>;}
+ if(!complete){const total=totalDays;return <div className="certificate-locked"><Mascot/><PageTitle title={t(copy.certificate)} subtitle={t(copy.certificateLocked)}/><div className="certificate-lock-badge"><Lock size={34}/></div><div className="certificate-progress"><div className="progress-track"><span style={{width:`${Math.round((progress.completed.length/total)*100)}%`}}/></div><strong>{progress.completed.length} / {total} {t(copy.day).toLowerCase()}</strong></div><Button asChild variant="learn" size="lg"><Link to="/lesson/$day" params={{day:String(Array.from({length:total},(_,i)=>i+1).find(d=>!progress.completed.includes(d))??total)}}>{t(copy.continue)}<ArrowLeft/></Link></Button></div>;}
  const awardedOn=progress.challengeDate??localDate();
  const prettyDate=new Date(`${awardedOn}T12:00:00`).toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});
  return <>
