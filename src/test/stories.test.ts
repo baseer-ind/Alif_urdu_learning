@@ -1,12 +1,12 @@
 import {describe,it,expect} from 'vitest';
-import {initialProgress,localDate,normalizeWords,compareWords,streak} from '@/lib/learning';
-import {stories,completeStorySentence,storyTask,storySentenceXp} from '@/lib/stories';
+import {initialProgress,localDate,normalizeWords,compareWords,streak,lessons} from '@/lib/learning';
+import {stories,completeStorySentence,storyTask,storySentenceXp,weeklyStories,storyUnlocked,daysUntilStory} from '@/lib/stories';
 import {seededAudioTexts} from '@/lib/urdu-tts-content';
 
 describe('Story learning rules',()=>{
  const story=stories.find(s=>s.id==='thirsty-crow');if(!story)throw new Error('Missing seeded story');
  it('seeds beginner stories with ordered Urdu, Roman, and translated meanings',()=>{
-  expect(stories).toHaveLength(5);expect(new Set(stories.map(s=>s.id)).size).toBe(5);
+  expect(stories).toHaveLength(7);expect(new Set(stories.map(s=>s.id)).size).toBe(7);
   for(const s of stories){expect(s.level).toBe('beginner');expect(s.sentences.length).toBeGreaterThanOrEqual(6);for(const sentence of s.sentences){expect(sentence.urdu).toMatch(/[\u0600-\u06ff]/);expect(sentence.roman.length).toBeGreaterThan(5);for(const lang of ['en','hi','ar','bn','es'] as const)expect(sentence.meaning[lang].length).toBeGreaterThan(0);}}
  });
  it('awards 20 XP per sentence only once',()=>{
@@ -30,5 +30,16 @@ describe('Story learning rules',()=>{
  });
  it('records the device-local date by default on completion',()=>{
   let p=initialProgress;for(let i=0;i<story.sentences.length;i++)p=completeStorySentence(p,story,i);expect(p.dates).toEqual([localDate()]);
+ });
+ it('keeps weekly stories locked until the challenge is finished, then releases one per week',()=>{
+  const base={...initialProgress,completed:Array.from({length:lessons.length},(_,i)=>i+1),challengeDate:'2026-10-10'};
+  const wk1=weeklyStories.find(s=>s.releaseWeek===1);const wk2=weeklyStories.find(s=>s.releaseWeek===2);if(!wk1||!wk2)throw new Error('Missing weekly stories');
+  expect(storyUnlocked(wk1,initialProgress,new Date('2026-10-10T12:00:00'))).toBe(false);
+  expect(daysUntilStory(wk1,initialProgress)).toBeNull();
+  expect(storyUnlocked(wk1,base,new Date('2026-10-10T12:00:00'))).toBe(true);
+  expect(storyUnlocked(wk2,base,new Date('2026-10-10T12:00:00'))).toBe(false);
+  expect(daysUntilStory(wk2,base,new Date('2026-10-10T12:00:00'))).toBe(7);
+  expect(storyUnlocked(wk2,base,new Date('2026-10-17T12:00:00'))).toBe(true);
+  expect(daysUntilStory(wk2,base,new Date('2026-10-13T12:00:00'))).toBe(4);
  });
 });

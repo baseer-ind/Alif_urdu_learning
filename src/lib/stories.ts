@@ -1,10 +1,10 @@
-import {award, localDate, text, type Progress, type Text} from './learning';
+import {award, challengeComplete, localDate, text, type Progress, type Text} from './learning';
 
 export type StorySentence = {urdu:string; roman:string; meaning:Text};
 // A book page: one illustration + a few lines, each line available in Urdu and English.
 export type BookLine = {ur:string; roman:string; en:string};
 export type BookPage = {art:string; lines:BookLine[]};
-export type Story = {id:string; titleUrdu:string; title:Text; level:'beginner'|'intermediate'; readingLevel?:number; description:Text; cover:0|1|2|3; sentences:StorySentence[]; book?:BookPage[]};
+export type Story = {id:string; titleUrdu:string; title:Text; level:'beginner'|'intermediate'; readingLevel?:number; description:Text; cover:0|1|2|3; sentences:StorySentence[]; book?:BookPage[]; releaseWeek?:number};
 // Stories that carry `book` pages open in the full-page bilingual reader; others use the sentence reader.
 export const bookToSentences = (book:BookPage[]):StorySentence[] => book.flatMap(p=>p.lines.map(l=>({urdu:l.ur,roman:l.roman,meaning:text(l.en,l.en,l.en,l.en,l.en)})));
 export const bookPageTask = (id:string,page:number) => `story:${id}:page:${page}`;
@@ -76,6 +76,23 @@ export const stories:Story[] = [
   {urdu:'ہم مل کر کھانا کھاتے ہیں۔',roman:'Ham mil kar khānā khāte hain.',meaning:text('We eat together.','हम मिलकर खाना खाते हैं।','نأكل معًا.','আমরা একসঙ্গে খাই।','Comemos juntos.')},
   {urdu:'ہم مل کر کتاب پڑھتے ہیں۔',roman:'Ham mil kar kitāb paṛhte hain.',meaning:text('We read a book together.','हम मिलकर किताब पढ़ते हैं।','نقرأ كتابًا معًا.','আমরা একসঙ্গে বই পড়ি।','Leemos un libro juntos.')},
  ]},
+ // Weekly stories: released one per week after the 30-day challenge is complete.
+ {id:'ant-and-grasshopper',titleUrdu:'چیونٹی اور ٹڈا',title:text('The ant and the grasshopper','चींटी और टिड्डा','النملة والجندب','পিঁপড়া ও ফড়িং','La hormiga y el saltamontes'),level:'beginner',cover:3,releaseWeek:1,description:text('A little work today saves a hungry tomorrow.','आज की मेहनत कल की भूख से बचाती है।','عمل اليوم ينقذ من جوع الغد.','আজকের পরিশ্রম কালকের ক্ষুধা থেকে বাঁচায়।','El trabajo de hoy evita el hambre de mañana.'),sentences:[
+  {urdu:'گرمیوں میں ایک چیونٹی کام کرتی تھی۔',roman:'Garmiyon mein ek cheontī kām kartī thī.',meaning:text('In summer, an ant was working.','गर्मियों में एक चींटी काम करती थी।','في الصيف كانت نملة تعمل.','গ্রীষ্মে একটি পিঁপড়া কাজ করত।','En verano, una hormiga trabajaba.')},
+  {urdu:'وہ سردیوں کے لیے دانے جمع کرتی تھی۔',roman:'Woh sardiyon ke liye dāne jamaʿ kartī thī.',meaning:text('She gathered grain for the winter.','वह सर्दियों के लिए दाने जमा करती थी।','كانت تجمع الحبوب للشتاء.','সে শীতের জন্য দানা জমাত।','Juntaba grano para el invierno.')},
+  {urdu:'ایک ٹڈا سارا دن گاتا رہتا تھا۔',roman:'Ek ṭiḍḍā sārā din gātā rehtā thā.',meaning:text('A grasshopper sang all day long.','एक टिड्डा सारा दिन गाता रहता था।','كان جندب يغنّي طوال اليوم.','একটি ফড়িং সারা দিন গান গাইত।','Un saltamontes cantaba todo el día.')},
+  {urdu:'ٹڈے نے کوئی کھانا جمع نہیں کیا۔',roman:'Ṭiḍḍe ne koī khānā jamaʿ nahīn kiyā.',meaning:text('The grasshopper stored no food.','टिड्डे ने कोई खाना जमा नहीं किया।','لم يخزّن الجندب أيّ طعام.','ফড়িং কোনো খাবার জমায়নি।','El saltamontes no guardó comida.')},
+  {urdu:'سردیاں آئیں اور ٹڈا بھوکا تھا۔',roman:'Sardiyān āyīn aur ṭiḍḍā bhūkā thā.',meaning:text('Winter came and the grasshopper was hungry.','सर्दियाँ आईं और टिड्डा भूखा था।','جاء الشتاء وكان الجندب جائعًا.','শীত এল আর ফড়িং ক্ষুধার্ত ছিল।','Llegó el invierno y el saltamontes tenía hambre.')},
+  {urdu:'چیونٹی نے اسے کھانا دیا اور محنت کا سبق سکھایا۔',roman:'Cheontī ne use khānā diyā aur mehnat kā sabaq sikhāyā.',meaning:text('The ant gave him food and taught the value of hard work.','चींटी ने उसे खाना दिया और मेहनत का सबक सिखाया।','أعطته النملة طعامًا وعلّمته قيمة العمل.','পিঁপড়া তাকে খাবার দিল আর পরিশ্রমের শিক্ষা দিল।','La hormiga le dio comida y le enseñó el valor del esfuerzo.')},
+ ]},
+ {id:'sun-and-wind',titleUrdu:'سورج اور ہوا',title:text('The sun and the wind','सूरज और हवा','الشمس والريح','সূর্য ও বাতাস','El sol y el viento'),level:'beginner',cover:1,releaseWeek:2,description:text('Gentle warmth wins where force cannot.','जहाँ ज़ोर हारता है, वहाँ नरमी जीतती है।','حيث تفشل القوة ينتصر اللطف.','জোর যেখানে ব্যর্থ, কোমলতা সেখানে জেতে।','Donde la fuerza falla, gana la calidez.'),sentences:[
+  {urdu:'سورج اور ہوا میں بحث ہوئی۔',roman:'Sūraj aur hawā mein bahes huī.',meaning:text('The sun and the wind had an argument.','सूरज और हवा में बहस हुई।','دار جدال بين الشمس والريح.','সূর্য ও বাতাসের মধ্যে তর্ক হল।','El sol y el viento tuvieron una discusión.')},
+  {urdu:'دونوں خود کو زیادہ طاقتور سمجھتے تھے۔',roman:'Donon khud ko zyādā tāqatwar samajhte the.',meaning:text('Each thought itself the stronger one.','दोनों खुद को ज़्यादा ताक़तवर समझते थे।','ظنّ كلٌّ منهما أنّه الأقوى.','দুজনেই নিজেকে বেশি শক্তিশালী ভাবত।','Cada uno se creía el más fuerte.')},
+  {urdu:'ایک مسافر نے گرم کوٹ پہنا تھا۔',roman:'Ek musāfir ne garm coaṭ pehnā thā.',meaning:text('A traveler was wearing a warm coat.','एक मुसाफ़िर ने गर्म कोट पहना था।','كان مسافر يرتدي معطفًا دافئًا.','এক পথিক একটি গরম কোট পরেছিল।','Un viajero llevaba un abrigo cálido.')},
+  {urdu:'ہوا نے زور سے پھونک ماری۔',roman:'Hawā ne zor se phūnk mārī.',meaning:text('The wind blew hard.','हवा ने ज़ोर से फूँक मारी।','هبّت الريح بقوّة.','বাতাস জোরে ফুঁ দিল।','El viento sopló con fuerza.')},
+  {urdu:'مسافر نے کوٹ اور مضبوطی سے پکڑ لیا۔',roman:'Musāfir ne coaṭ aur mazbūtī se pakaṛ liyā.',meaning:text('The traveler held his coat even tighter.','मुसाफ़िर ने कोट और मज़बूती से पकड़ लिया।','تشبّث المسافر بمعطفه أكثر.','পথিক কোটটি আরও শক্ত করে ধরল।','El viajero se aferró aún más al abrigo.')},
+  {urdu:'پھر سورج چمکا اور مسافر نے خود کوٹ اتار دیا۔',roman:'Phir sūraj chamkā aur musāfir ne khud coaṭ utār diyā.',meaning:text('Then the sun shone and the traveler took off his coat himself.','फिर सूरज चमका और मुसाफ़िर ने खुद कोट उतार दिया।','ثمّ أشرقت الشمس فخلع المسافر معطفه بنفسه.','তারপর সূর্য উঠল আর পথিক নিজেই কোট খুলে ফেলল।','Entonces brilló el sol y el viajero se quitó el abrigo solo.')},
+ ]},
 ];
 
 export const storySentenceXp = 20;
@@ -88,3 +105,29 @@ export function completeStorySentence(p:Progress,story:Story,index:number,date=l
  if (completedStorySentences(story,next)!==story.sentences.length || next.tasks.includes(storyTask(story.id))) return next;
  return {...next,tasks:[...next.tasks,storyTask(story.id)],dates:next.dates.includes(date)?next.dates:[...next.dates,date]};
 }
+
+// Weekly drip: a story with a releaseWeek unlocks that many weeks after the challenge is finished.
+export const weeklyCopy = {
+ weekly:text('Weekly story','साप्ताहिक कहानी','قصة الأسبوع','সাপ্তাহিক গল্প','Historia semanal'),
+ unlockHint:text('Finish your 30-day challenge to unlock weekly stories.','साप्ताहिक कहानियों के लिए 30 दिन की चुनौती पूरी करें।','أكمل تحدّي ٣٠ يومًا لفتح قصص الأسبوع.','সাপ্তাহিক গল্প আনলক করতে ৩০ দিনের চ্যালেঞ্জ শেষ করুন।','Completa tu reto de 30 días para desbloquear las historias semanales.'),
+ nextStory:text('Your next story is on its way','आपकी अगली कहानी जल्द आ रही है','قصتك التالية في الطريق','আপনার পরের গল্প আসছে','Tu próxima historia está en camino'),
+ availableNow:text('A new story is ready for you!','आपके लिए एक नई कहानी तैयार है!','قصة جديدة جاهزة لك!','আপনার জন্য নতুন গল্প প্রস্তুত!','¡Una nueva historia está lista!'),
+ unlocksIn:(days:number)=>text(`Unlocks in ${days} ${days===1?'day':'days'}`,`${days} दिन में खुलेगी`,`تُفتح خلال ${days} ${days===1?'يوم':'أيام'}`,`${days} দিনে খুলবে`,`Se abre en ${days} ${days===1?'día':'días'}`),
+ unlocksToday:text('Unlocks today','आज खुलेगी','تُفتح اليوم','আজ খুলবে','Se abre hoy'),
+};
+const dayDiff=(from:string,toDate:string)=>Math.round((new Date(`${toDate}T12:00:00`).getTime()-new Date(`${from}T12:00:00`).getTime())/86400000);
+export const isWeeklyStory=(story:Story)=>typeof story.releaseWeek==='number'&&story.releaseWeek>=1;
+// A weekly story needs the challenge finished, plus (releaseWeek-1) full weeks since the finish date.
+export function storyUnlocked(story:Story,p:Progress,today=new Date()):boolean {
+ if (!isWeeklyStory(story)) return true;
+ if (!p.challengeDate || !challengeComplete(p)) return false;
+ return dayDiff(p.challengeDate,localDate(today)) >= (story.releaseWeek!-1)*7;
+}
+// Whole days remaining before a weekly story unlocks; null when the challenge itself is still unfinished.
+export function daysUntilStory(story:Story,p:Progress,today=new Date()):number|null {
+ if (!isWeeklyStory(story)) return 0;
+ if (!p.challengeDate || !challengeComplete(p)) return null;
+ return Math.max(0,(story.releaseWeek!-1)*7 - dayDiff(p.challengeDate,localDate(today)));
+}
+export const coreStories=stories.filter(s=>!isWeeklyStory(s));
+export const weeklyStories=stories.filter(isWeeklyStory).sort((a,b)=>(a.releaseWeek??0)-(b.releaseWeek??0));

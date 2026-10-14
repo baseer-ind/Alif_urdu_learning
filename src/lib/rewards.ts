@@ -1,4 +1,4 @@
-import {copy,streak,text,type Progress} from './learning';
+import {copy,streak,text,challengeComplete,lessons,type Progress} from './learning';
 import {stories,storyTask} from './stories';
 
 export const rewardsCopy={
@@ -18,6 +18,7 @@ export function milestones(p:Progress) {
   {id:'five',title:text('Five story explorer','पाँच कहानियों के खोजी','مستكشف خمس قصص','পাঁচ গল্পের অভিযাত্রী','Explorador de cinco historias'),earned:count>=5,current:Math.min(5,count),target:5},
   {id:'streak',title:copy.streakBadge,earned:p.dates.some(date=>streak(p.dates,new Date(`${date}T12:00:00`))>=7),current:Math.min(7,Math.max(0,...p.dates.map(date=>streak(p.dates,new Date(`${date}T12:00:00`))))),target:7},
   {id:'week',title:copy.weekBadge,earned:p.completed.length>=6,current:Math.min(6,p.completed.length),target:6},
+  {id:'certificate',title:copy.challengeDone,earned:challengeComplete(p),current:Math.min(lessons.length,p.completed.length),target:lessons.length},
   ...[1,2,3].map(level=>({id:`level-${level}`,title:text(`Level ${level}`,`स्तर ${level}`,`المستوى ${level}`,`স্তর ${level}`,`Nivel ${level}`,`سطح ${level}`),earned:levelComplete(p,level),current:stories.filter(b=>b.readingLevel===level&&p.tasks.includes(storyTask(b.id))).length,target:stories.filter(b=>b.readingLevel===level).length})),
  ];
 }

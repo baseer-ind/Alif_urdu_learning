@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CertificateRouteImport } from './routes/certificate'
 import { Route as PlacementRouteImport } from './routes/placement'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ReadRouteImport } from './routes/read'
@@ -24,6 +25,11 @@ import { Route as ApiPublicUrduTtsRouteImport } from './routes/api/public/urdu-t
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CertificateRoute = CertificateRouteImport.update({
+  id: '/certificate',
+  path: '/certificate',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlacementRoute = PlacementRouteImport.update({
@@ -79,6 +85,7 @@ const ApiPublicUrduTtsRoute = ApiPublicUrduTtsRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/certificate': typeof CertificateRoute
   '/placement': typeof PlacementRoute
   '/profile': typeof ProfileRoute
   '/read': typeof ReadRoute
@@ -92,6 +99,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/certificate': typeof CertificateRoute
   '/placement': typeof PlacementRoute
   '/profile': typeof ProfileRoute
   '/read': typeof ReadRoute
@@ -106,6 +114,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/certificate': typeof CertificateRoute
   '/placement': typeof PlacementRoute
   '/profile': typeof ProfileRoute
   '/read': typeof ReadRoute
@@ -121,6 +130,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/certificate'
     | '/placement'
     | '/profile'
     | '/read'
@@ -134,6 +144,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/certificate'
     | '/placement'
     | '/profile'
     | '/read'
@@ -147,6 +158,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/certificate'
     | '/placement'
     | '/profile'
     | '/read'
@@ -161,6 +173,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CertificateRoute: typeof CertificateRoute
   PlacementRoute: typeof PlacementRoute
   ProfileRoute: typeof ProfileRoute
   ReadRoute: typeof ReadRoute
@@ -180,6 +193,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/certificate': {
+      id: '/certificate'
+      path: '/certificate'
+      fullPath: '/certificate'
+      preLoaderRoute: typeof CertificateRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/placement': {
@@ -257,6 +277,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CertificateRoute: CertificateRoute,
   PlacementRoute: PlacementRoute,
   ProfileRoute: ProfileRoute,
   ReadRoute: ReadRoute,

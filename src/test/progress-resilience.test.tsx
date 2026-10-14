@@ -34,6 +34,10 @@ describe('Learning remains usable without optional services',()=>{
  it('filters invalid lesson, task and date entries and non-finite XP',()=>{
   expect(normalizeProgress({language:'invalid',placement:{},xp:Infinity,completed:[1,1,99,null],tasks:['read-0',null],dates:['2026-10-10','2026-02-31',null]})).toEqual({language:null,placement:null,xp:0,completed:[1],tasks:['read-0'],dates:['2026-10-10']});
  });
+ it('normalizes an optional learner name and challenge date and drops malformed ones',()=>{
+  expect(normalizeProgress({language:'en',placement:'beginner',xp:0,completed:[],tasks:[],dates:[],name:'  Sara  ',challengeDate:'2026-10-10'})).toEqual({language:'en',placement:'beginner',xp:0,completed:[],tasks:[],dates:[],name:'Sara',challengeDate:'2026-10-10'});
+  expect(normalizeProgress({name:'   ',challengeDate:'2026-13-40'})).toEqual({language:null,placement:null,xp:0,completed:[],tasks:[],dates:[]});
+ });
  it('handles absent translated content and falls back to English',()=>{
   expect(translate(undefined,'en')).toBe('');expect(translate({en:'Water'},'hi')).toBe('Water');
  });
