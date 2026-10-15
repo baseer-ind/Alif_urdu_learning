@@ -39,10 +39,3 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: bunx wrangler deploy --config .output/server/wrangler.json
-  # TEMPORARY: gate probe for PR verification only. Reverted before merge.
-  gate-probe:
-    needs: verify
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "verify succeeded; a deploy job with needs:verify would be allowed to run"
