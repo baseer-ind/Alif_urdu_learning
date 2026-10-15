@@ -1,4 +1,5 @@
-# Push-to-deploy: every push to main builds Alif and deploys it to Cloudflare.
+# Push-to-deploy: every push to main is tested and built, then deployed to Cloudflare.
+# Pull requests run the same test + build gate but never deploy.
 # One-time setup in GitHub → Settings → Secrets and variables → Actions:
 #   CLOUDFLARE_API_TOKEN   (Cloudflare → My Profile → API Tokens → "Edit Cloudflare Workers" template)
 # The account is auto-detected from the token (it is scoped to one account). If
@@ -8,16 +9,31 @@ name: Deploy to Cloudflare
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
 jobs:
-  deploy:
+  verify:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.2
-      - run: bun install
+      - run: bun install --frozen-lockfile
+      - run: bun run test
+      - run: bun run build
+  deploy:
+    # Only runs after verify succeeds, and only for main (never for PRs or
+    # manual runs started from another branch).
+    needs: verify
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
       - run: bun run build
       - name: Deploy Worker
         env:
