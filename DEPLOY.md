@@ -37,6 +37,17 @@ Tokens → "Edit Cloudflare Workers" template) and `CLOUDFLARE_ACCOUNT_ID`
 (Workers & Pages → Account ID) — and every push to `main` builds and deploys
 for you. No local wrangler needed after that.
 
+**Test gate.** The workflow has two jobs. `test` runs on every push to `main`
+and every pull request: `bun install --frozen-lockfile`, `bun run test`
+(Vitest), `bun run build`. `deploy` runs only on a push to `main` and only
+after `test` succeeds, so a failing test or a broken build blocks the deploy
+instead of shipping. To see why a run failed, open the repo's **Actions** tab,
+click the red run, and expand the failing step; fix the test or build locally
+with the same two commands, then push again. A run can also be re-run from the
+same page (**Re-run jobs**) if the failure was transient (e.g. a registry
+outage). Note that `--frozen-lockfile` means a `package.json` change must be
+committed together with the updated `bun.lock` (run `bun install` locally).
+
 ## 3. (Optional) Turn on Google cloud narration
 
 Skip this and the app still talks, using the device's built-in voice. To use

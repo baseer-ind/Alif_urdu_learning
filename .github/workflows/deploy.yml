@@ -1,23 +1,44 @@
-# Push-to-deploy: every push to main builds Alif and deploys it to Cloudflare.
+# Test gate + push-to-deploy.
+#
+# Every push to main and every pull request runs the `test` job (install with a
+# frozen lockfile, run the Vitest suite, build the Worker bundle). The `deploy`
+# job only runs on a push to main AND only after `test` succeeds, so a commit
+# with a failing test or a broken build never reaches Cloudflare.
+#
 # One-time setup in GitHub → Settings → Secrets and variables → Actions:
 #   CLOUDFLARE_API_TOKEN   (Cloudflare → My Profile → API Tokens → "Edit Cloudflare Workers" template)
 # The account is auto-detected from the token (it is scoped to one account). If
 # your token ever covers multiple accounts, also add a CLOUDFLARE_ACCOUNT_ID
 # secret and pass it in the Deploy step env.
-name: Deploy to Cloudflare
+name: Test and deploy to Cloudflare
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
+permissions:
+  contents: read
 jobs:
-  deploy:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.2
-      - run: bun install
+      - run: bun install --frozen-lockfile
+      - run: bun run test
+      - run: bun run build
+  deploy:
+    needs: test
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
       - run: bun run build
       - name: Deploy Worker
         env:
