@@ -51,6 +51,28 @@ Note: the voice is `ur-IN` (Indian Urdu) — the best Google offers for Urdu. To
 native Pakistani-Urdu ear it can lean Hindi. True `ur-PK` needs Azure or human
 recordings, which are a paid/manual step we deliberately did not take.
 
+## 3b. (Optional) Turn on read-aloud mic grading (cloud speech-to-text)
+
+Without this, the mic grading uses the browser's recognizer, which only works on
+devices that have Urdu dictation installed. Turning it on makes it work on every
+device — the phone records the reading and Google transcribes it.
+
+1. In Google Cloud, **enable the Speech-to-Text API**, then create an **API key
+   restricted to Speech-to-Text**.
+2. **Set a per-day quota on that key** (Google Cloud → APIs & Services → the
+   Speech-to-Text API → Quotas). This cap is what actually protects your bill —
+   budget alerts only warn, they don't stop spending.
+3. Add it as a Worker secret:
+   ```bash
+   npx wrangler secret put GOOGLE_STT_API_KEY --config .output/server/wrangler.json
+   ```
+   (If you leave this unset but have `GOOGLE_TTS_API_KEY`, that key is used as a
+   fallback — but a separate restricted key is safer.)
+
+The endpoint (`/api/public/urdu-stt`) caps recording size, and the client only
+records ~8-second clips. Accuracy for Urdu is good, not perfect. Works today on
+Android Chrome; iOS support depends on the browser's audio recording.
+
 ## 4. Accounts
 
 v1 has **no accounts and no login** — progress is device-local by design. The

@@ -21,6 +21,7 @@ import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as WritingRouteImport } from './routes/writing'
 import { Route as LessonDayRouteImport } from './routes/lesson.$day'
 import { Route as StoryIdRouteImport } from './routes/story.$id'
+import { Route as ApiPublicUrduSttRouteImport } from './routes/api/public/urdu-stt'
 import { Route as ApiPublicUrduTtsRouteImport } from './routes/api/public/urdu-tts'
 
 const IndexRoute = IndexRouteImport.update({
@@ -83,6 +84,11 @@ const StoryIdRoute = StoryIdRouteImport.update({
   path: '/story/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicUrduSttRoute = ApiPublicUrduSttRouteImport.update({
+  id: '/api/public/urdu-stt',
+  path: '/api/public/urdu-stt',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicUrduTtsRoute = ApiPublicUrduTtsRouteImport.update({
   id: '/api/public/urdu-tts',
   path: '/api/public/urdu-tts',
@@ -102,6 +108,7 @@ export interface FileRoutesByFullPath {
   '/writing': typeof WritingRoute
   '/lesson/$day': typeof LessonDayRoute
   '/story/$id': typeof StoryIdRoute
+  '/api/public/urdu-stt': typeof ApiPublicUrduSttRoute
   '/api/public/urdu-tts': typeof ApiPublicUrduTtsRoute
 }
 export interface FileRoutesByTo {
@@ -117,6 +124,7 @@ export interface FileRoutesByTo {
   '/writing': typeof WritingRoute
   '/lesson/$day': typeof LessonDayRoute
   '/story/$id': typeof StoryIdRoute
+  '/api/public/urdu-stt': typeof ApiPublicUrduSttRoute
   '/api/public/urdu-tts': typeof ApiPublicUrduTtsRoute
 }
 export interface FileRoutesById {
@@ -133,6 +141,7 @@ export interface FileRoutesById {
   '/writing': typeof WritingRoute
   '/lesson/$day': typeof LessonDayRoute
   '/story/$id': typeof StoryIdRoute
+  '/api/public/urdu-stt': typeof ApiPublicUrduSttRoute
   '/api/public/urdu-tts': typeof ApiPublicUrduTtsRoute
 }
 export interface FileRouteTypes {
@@ -150,6 +159,7 @@ export interface FileRouteTypes {
     | '/writing'
     | '/lesson/$day'
     | '/story/$id'
+    | '/api/public/urdu-stt'
     | '/api/public/urdu-tts'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -165,6 +175,7 @@ export interface FileRouteTypes {
     | '/writing'
     | '/lesson/$day'
     | '/story/$id'
+    | '/api/public/urdu-stt'
     | '/api/public/urdu-tts'
   id:
     | '__root__'
@@ -180,6 +191,7 @@ export interface FileRouteTypes {
     | '/writing'
     | '/lesson/$day'
     | '/story/$id'
+    | '/api/public/urdu-stt'
     | '/api/public/urdu-tts'
   fileRoutesById: FileRoutesById
 }
@@ -196,6 +208,7 @@ export interface RootRouteChildren {
   WritingRoute: typeof WritingRoute
   LessonDayRoute: typeof LessonDayRoute
   StoryIdRoute: typeof StoryIdRoute
+  ApiPublicUrduSttRoute: typeof ApiPublicUrduSttRoute
   ApiPublicUrduTtsRoute: typeof ApiPublicUrduTtsRoute
 }
 
@@ -285,6 +298,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StoryIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/urdu-stt': {
+      id: '/api/public/urdu-stt'
+      path: '/api/public/urdu-stt'
+      fullPath: '/api/public/urdu-stt'
+      preLoaderRoute: typeof ApiPublicUrduSttRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/urdu-tts': {
       id: '/api/public/urdu-tts'
       path: '/api/public/urdu-tts'
@@ -308,6 +328,7 @@ const rootRouteChildren: RootRouteChildren = {
   WritingRoute: WritingRoute,
   LessonDayRoute: LessonDayRoute,
   StoryIdRoute: StoryIdRoute,
+  ApiPublicUrduSttRoute: ApiPublicUrduSttRoute,
   ApiPublicUrduTtsRoute: ApiPublicUrduTtsRoute,
 }
 export const routeTree = rootRouteImport
