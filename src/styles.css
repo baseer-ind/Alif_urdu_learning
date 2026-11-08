@@ -45,7 +45,8 @@
 .book-lines{font-weight:600;color:var(--foreground)}
 .book-lines.ur{font-family:var(--font-urdu);font-size:28px;line-height:2.5}
 .book-lines.en{font-family:var(--font-display);font-size:23px;line-height:1.9;font-weight:800}
-.book-word{font:inherit;color:inherit;background:transparent;border:0;padding:2px 7px;margin:1px;border-radius:10px;cursor:pointer;transition:background .15s,color .15s,box-shadow .15s;-webkit-tap-highlight-color:transparent}
+.book-word{font:inherit;color:inherit;background:transparent;border:0;padding:2px 7px;margin:1px;border-radius:10px;cursor:pointer;vertical-align:middle;transition:background .15s,color .15s,box-shadow .15s;-webkit-tap-highlight-color:transparent}
+.book-read{scroll-margin-bottom:90px}
 .book-word:hover{background:var(--yellow-soft)}
 .book-word.done{color:var(--success)}
 .book-word.current{background:var(--secondary);color:var(--secondary-foreground);box-shadow:0 0 0 2px var(--primary)}

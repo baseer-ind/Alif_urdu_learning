@@ -37,8 +37,9 @@ export function BookReader({story}:{story:Story}) {
   const [finished,setFinished]=useState(false);
 
   const current=book[page]!;
+  const [spoken,setSpoken]=useState<{got:number;total:number}|null>(null);
   const words=useMemo(()=>current.lines.flatMap(l=>(lang==='ur'?l.ur:l.en).split(/\s+/).filter(Boolean)),[current,lang]);
-  useEffect(()=>{setCur(0);},[page,lang]);
+  useEffect(()=>{setCur(0);setSpoken(null);},[page,lang]);
 
   const completePage=(idx:number)=>setProgress(p=>{
     let next=award(p,bookPageTask(story.id,idx),20);
@@ -75,7 +76,16 @@ export function BookReader({story}:{story:Story}) {
 
   // Mic read-along (Urdu only — reuses the app's tested recognition + alignment).
   const pageUrdu=current.lines.map(l=>l.ur).join(' ');
-  const {supported,listening,error,start,stop}=useReadAloud(pageUrdu,finishPage);
+  const {supported,listening,error,transcript,result,start,stop}=useReadAloud(pageUrdu,finishPage);
+  // After a read, advance the highlight to how far the reader got right and show
+  // a score, instead of only reacting to a flawless full-page read.
+  useEffect(()=>{
+    if(transcript===null||lang!=='ur'||!result)return;
+    let got=0;for(const ok of result.correct){if(ok)got++;else break;}
+    setSpoken({got,total:result.total});
+    setCur(Math.min(got,words.length));
+  },[transcript]); // eslint-disable-line react-hooks/exhaustive-deps
+  const beginRead=()=>{setSpoken(null);start();};
 
   if (finished) return (
     <div className="story-completion">
@@ -112,10 +122,11 @@ export function BookReader({story}:{story:Story}) {
           <div className="book-controls">
             <Button variant="outline" onClick={listenPage} aria-label="Listen to page"><Volume2 size={17}/>Listen</Button>
             {supported!==false
-              ? <Button variant="learn" onClick={listening?stop:start} aria-pressed={listening} aria-label="Read aloud">{listening?<Square size={17}/>:<Mic size={17}/>}{listening?'Listening…':'Read aloud'}</Button>
-              : <span className="book-nomic">🎤 Chrome only</span>}
+              ? <Button variant="learn" onClick={listening?stop:beginRead} aria-pressed={listening} aria-label="Read aloud">{listening?<Square size={17}/>:<Mic size={17}/>}{listening?'Listening…':'Read aloud'}</Button>
+              : <span className="book-nomic">🎤 Mic unavailable</span>}
           </div>
-          {error && <p className="book-hint">Didn’t catch that — tap each word to read along.</p>}
+          {spoken && !error && <p className="book-hint">{spoken.got>=spoken.total?'Perfect! 🎉':`You read ${spoken.got} / ${spoken.total} words — tap a word to hear it, then try again.`}</p>}
+          {error && <p className="book-hint">Didn’t catch that — tap each word to hear it and read along.</p>}
           <div className="book-nav">
             <Button variant="outline" aria-label={t(storyCopy.previous)} disabled={page===0} onClick={()=>setPage(p=>p-1)}><ArrowLeft/></Button>
             <div className="book-dots">{book.map((_,i)=>(
