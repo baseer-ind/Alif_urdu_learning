@@ -1,4 +1,4 @@
-import {useEffect,useMemo,useState} from 'react';
+import {useEffect,useMemo,useRef,useState} from 'react';
 import {Link} from '@tanstack/react-router';
 import {ArrowLeft,ArrowRight,Mic,Square,Trophy,Volume2} from 'lucide-react';
 import {Button} from '@/components/ui/button';
@@ -7,6 +7,7 @@ import {StoryArt} from '@/lib/story-art';
 import {useProgress,celebrate} from '@/lib/progress';
 import {useReadAloud} from '@/hooks/use-read-aloud';
 import {playUrduAudio} from '@/lib/urdu-audio';
+import {requestUrduAudio} from '@/lib/urdu-tts-client';
 import {award,localDate} from '@/lib/learning';
 import {storyCopy,storyTask,bookPageTask,type Story} from '@/lib/stories';
 
@@ -35,11 +36,16 @@ export function BookReader({story}:{story:Story}) {
   const [page,setPage]=useState(0);
   const [cur,setCur]=useState(0);
   const [finished,setFinished]=useState(false);
+  const [playing,setPlaying]=useState(false); // Listen karaoke in progress
+  const playingRef=useRef(false);
+  const audioRef=useRef<HTMLAudioElement|null>(null);
 
   const current=book[page]!;
   const [spoken,setSpoken]=useState<{got:number;total:number}|null>(null);
   const words=useMemo(()=>current.lines.flatMap(l=>(lang==='ur'?l.ur:l.en).split(/\s+/).filter(Boolean)),[current,lang]);
-  useEffect(()=>{setCur(0);setSpoken(null);},[page,lang]);
+  const stopKaraoke=()=>{playingRef.current=false;setPlaying(false);try{audioRef.current?.pause();window.speechSynthesis?.cancel();}catch{/* audio is optional */}};
+  useEffect(()=>{setCur(0);setSpoken(null);stopKaraoke();},[page,lang]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(()=>()=>stopKaraoke(),[]); // stop on unmount
 
   const completePage=(idx:number)=>setProgress(p=>{
     let next=award(p,bookPageTask(story.id,idx),20);
@@ -69,9 +75,41 @@ export function BookReader({story}:{story:Story}) {
     if (i!==cur) return;
     if (i+1>=words.length) finishPage(); else setCur(i+1);
   };
-  const listenPage=()=>{
-    const full=current.lines.map(l=>lang==='ur'?l.ur:l.en).join(' ');
-    if (lang==='ur') playUrduAudio(clean(full,'ur')); else speakEnglish(full.replace(/[^a-zA-Z0-9 ,.!?']/g,' '));
+  // Play one word and resolve when it finishes, so Listen can light up words in turn.
+  const playWord=(word:string):Promise<void>=>new Promise(resolve=>{
+    const c=clean(word,lang);
+    if(!c){resolve();return;}
+    let settled=false;const done=()=>{if(settled)return;settled=true;resolve();};
+    if(lang==='en'){
+      try{const u=new SpeechSynthesisUtterance(c);const v=window.speechSynthesis.getVoices().find(x=>/^en/i.test(x.lang));if(v){u.voice=v;u.lang=v.lang;}else u.lang='en-US';u.rate=.9;u.onend=done;u.onerror=done;window.speechSynthesis.speak(u);}catch{done();}
+      setTimeout(done,2600);return;
+    }
+    requestUrduAudio(c).then(url=>{
+      if(!playingRef.current){done();return;}
+      if(!url){ // no cloud clip — use the device voice, else just pace the highlight
+        try{const u=new SpeechSynthesisUtterance(c);u.lang='ur';u.rate=.85;u.onend=done;u.onerror=done;window.speechSynthesis.speak(u);setTimeout(done,1600);}catch{setTimeout(done,500);}
+        return;
+      }
+      const a=audioRef.current ?? (audioRef.current=new Audio());
+      a.onended=done;a.onerror=done;a.src=url;a.play().catch(done);
+      setTimeout(done,4000); // safety cap per word
+    }).catch(done);
+  });
+
+  // Listen = read the page to you, highlighting each word as it is spoken.
+  const listenPage=async()=>{
+    if(playingRef.current){stopKaraoke();return;}
+    // Unlock audio inside the tap so mobile allows the chained clips.
+    const a=audioRef.current ?? (audioRef.current=new Audio());
+    try{a.play().catch(()=>{});}catch{/* unlock best-effort */}
+    playingRef.current=true;setPlaying(true);setSpoken(null);
+    for(let i=0;i<words.length;i++){
+      if(!playingRef.current)break;
+      setCur(i);
+      await playWord(words[i]!);
+    }
+    if(playingRef.current)setCur(words.length);
+    playingRef.current=false;setPlaying(false);
   };
 
   // Mic read-along (Urdu only — reuses the app's tested recognition + alignment).
@@ -120,7 +158,7 @@ export function BookReader({story}:{story:Story}) {
             ))}
           </div>
           <div className="book-controls">
-            <Button variant="outline" onClick={listenPage} aria-label="Listen to page"><Volume2 size={17}/>Listen</Button>
+            <Button variant="outline" onClick={listenPage} aria-pressed={playing} aria-label="Listen to page">{playing?<Square size={17}/>:<Volume2 size={17}/>}{playing?'Stop':'Listen'}</Button>
             {supported!==false
               ? <Button variant="learn" onClick={listening?stop:beginRead} aria-pressed={listening} aria-label="Read aloud">{listening?<Square size={17}/>:<Mic size={17}/>}{listening?'Listening…':'Read aloud'}</Button>
               : <span className="book-nomic">🎤 Mic unavailable</span>}
