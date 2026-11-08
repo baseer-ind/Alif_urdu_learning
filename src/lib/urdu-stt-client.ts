@@ -60,18 +60,18 @@ export function startCloudRecognition(h: CloudHandlers): {stop: () => void} {
       analyser.fftSize = 512;
       ctx.createMediaStreamSource(s).connect(analyser);
       const buf = new Uint8Array(analyser.fftSize);
-      let noise = 0.015, speaking = false, last = 0;
+      let noise = 0.012, last = 0;
       const tick = () => {
         if (stopped || !ctx || ctx.state === 'closed') return;
         analyser.getByteTimeDomainData(buf);
         let sum = 0;
         for (let i = 0; i < buf.length; i++) {const v = (buf[i]! - 128) / 128; sum += v * v;}
         const rms = Math.sqrt(sum / buf.length);
-        noise = noise * 0.995 + rms * 0.005;
-        const hi = Math.max(0.045, noise * 3.2);
+        noise = noise * 0.997 + rms * 0.003; // slow noise floor
+        const hi = Math.max(0.028, noise * 2.2);
         const now = performance.now();
-        if (!speaking && rms > hi) {speaking = true; if (now - last > 170) {last = now; h.onPace?.();}}
-        else if (speaking && rms < hi * 0.55) {speaking = false;}
+        // Walk the highlight forward at reading cadence whenever speech is present.
+        if (rms > hi && now - last > 240) {last = now; h.onPace?.();}
         requestAnimationFrame(tick);
       };
       requestAnimationFrame(tick);
