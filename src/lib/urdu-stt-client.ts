@@ -49,18 +49,24 @@ export function startCloudRecognition(h: CloudHandlers): {stop: () => void} {
   let timer: ReturnType<typeof setTimeout> | undefined;
   const chunks: BlobPart[] = [];
   const cleanup = () => {clearTimeout(timer); try {ctx?.close();} catch {/* ignore */} stream?.getTracks().forEach(t => t.stop());};
-  // Live word-by-word pacing: advance one word each time the mic hears speech start.
-  const startPace = (s: MediaStream) => {
+  // Create + resume the audio context now, inside the tap, so mobile keeps it running
+  // (a context created after the mic prompt starts suspended and hears nothing).
+  if (h.onPace) {
     try {
-      const AC = (window.AudioContext ?? (window as unknown as {webkitAudioContext?: typeof AudioContext}).webkitAudioContext);
-      if (!AC) return;
-      ctx = new AC();
+      const AC = window.AudioContext ?? (window as unknown as {webkitAudioContext?: typeof AudioContext}).webkitAudioContext;
+      if (AC) {ctx = new AC(); void ctx.resume?.();}
+    } catch {/* pacing optional */}
+  }
+  // Live word-by-word pacing: walk the highlight forward at reading cadence while the mic hears you.
+  const startPace = (s: MediaStream) => {
+    if (!ctx) return;
+    try {
       void ctx.resume?.();
       const analyser = ctx.createAnalyser();
       analyser.fftSize = 512;
       ctx.createMediaStreamSource(s).connect(analyser);
       const buf = new Uint8Array(analyser.fftSize);
-      let noise = 0.012, last = 0;
+      let noise = 0.01, last = 0;
       const tick = () => {
         if (stopped || !ctx || ctx.state === 'closed') return;
         analyser.getByteTimeDomainData(buf);
@@ -68,10 +74,9 @@ export function startCloudRecognition(h: CloudHandlers): {stop: () => void} {
         for (let i = 0; i < buf.length; i++) {const v = (buf[i]! - 128) / 128; sum += v * v;}
         const rms = Math.sqrt(sum / buf.length);
         noise = noise * 0.997 + rms * 0.003; // slow noise floor
-        const hi = Math.max(0.028, noise * 2.2);
+        const hi = Math.max(0.02, noise * 1.9);
         const now = performance.now();
-        // Walk the highlight forward at reading cadence whenever speech is present.
-        if (rms > hi && now - last > 240) {last = now; h.onPace?.();}
+        if (rms > hi && now - last > 190) {last = now; h.onPace?.();}
         requestAnimationFrame(tick);
       };
       requestAnimationFrame(tick);
