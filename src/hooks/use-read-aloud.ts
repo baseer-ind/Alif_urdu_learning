@@ -14,6 +14,7 @@ export function useReadAloud(urdu:string,onPerfect:()=>void) {
  const [supported,setSupported]=useState<boolean|null>(null);
  const [listening,setListening]=useState(false);
  const [error,setError]=useState(false);
+ const [detail,setDetail]=useState<string|null>(null); // diagnostic reason when the mic fails
  const ref=useRef<Recognition|null>(null);
  const cloud=useRef<{stop:()=>void}|null>(null);
  const active=useRef(false);
@@ -41,16 +42,16 @@ export function useReadAloud(urdu:string,onPerfect:()=>void) {
  };
 
  const start=()=>{
-  setTranscript(null);setError(false);active.current=true;
+  setTranscript(null);setError(false);setDetail(null);active.current=true;
   if(cloudSttSupported()){
    setListening(true);
    cloud.current=startCloudRecognition({
-    onTranscript:text=>{cloud.current=null;if(active.current)score(text);},
-    onUnavailable:()=>{cloud.current=null;if(active.current)startBrowser();},
-    onError:()=>{cloud.current=null;active.current=false;setListening(false);setError(true);},
+    onTranscript:text=>{cloud.current=null;if(!active.current)return;if(!text.trim())setDetail('cloud reached Google but heard no words');score(text);},
+    onUnavailable:reason=>{cloud.current=null;setDetail('cloud unavailable: '+reason);if(active.current)startBrowser();},
+    onError:reason=>{cloud.current=null;setDetail('cloud error: '+reason);active.current=false;setListening(false);setError(true);},
    });
-  }else startBrowser();
+  }else{setDetail('cloud not supported on this browser');startBrowser();}
  };
  const stop=()=>{clearTimer();if(cloud.current){cloud.current.stop();return;}active.current=false;ref.current?.stop();setListening(false);};
- return {transcript,supported,listening,error,start,stop,result:transcript===null?null:compareWords(urdu,transcript),words:compareWords(urdu,'').words};
+ return {transcript,supported,listening,error,detail,start,stop,result:transcript===null?null:compareWords(urdu,transcript),words:compareWords(urdu,'').words};
 }
