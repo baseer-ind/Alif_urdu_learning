@@ -74,7 +74,12 @@ export function startCloudRecognition(h: CloudHandlers): {stop: () => void} {
           body: JSON.stringify({audio: base64, encoding: picked.encoding}),
         });
         if (res.status === 503) {cloudUnconfigured = true; h.onUnavailable('cloud-503'); return;}
-        if (!res.ok) {h.onError(`cloud-http-${res.status}`); return;}
+        if (!res.ok) {
+          let reason = `cloud-http-${res.status}`;
+          try {const b = await res.json(); if (b?.googleStatus) reason += ` g${b.googleStatus}`; if (b?.detail) reason += `: ${String(b.detail).slice(0, 90)}`;} catch {/* non-JSON */}
+          h.onError(reason);
+          return;
+        }
         const data = await res.json();
         h.onTranscript(typeof data?.transcript === 'string' ? data.transcript : '');
       } catch {h.onError('client-exception');}

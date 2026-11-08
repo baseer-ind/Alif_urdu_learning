@@ -36,7 +36,9 @@ export async function handleUrduStt(request: Request): Promise<Response> {
       headers: {'Content-Type': 'application/json'},
       signal: AbortSignal.timeout(20000),
       body: JSON.stringify({
-        config: {encoding, sampleRateHertz: 48000, languageCode: 'ur-PK', alternativeLanguageCodes: ['ur-IN'], maxAlternatives: 1, enableAutomaticPunctuation: false},
+        // Opus carries its own sample rate in the container header; passing
+        // sampleRateHertz too makes Google reject the request with 400.
+        config: {encoding, languageCode: 'ur-PK', alternativeLanguageCodes: ['ur-IN'], maxAlternatives: 1, enableAutomaticPunctuation: false},
         audio: {content: audio},
       }),
     });
@@ -48,7 +50,7 @@ export async function handleUrduStt(request: Request): Promise<Response> {
     try {const b = await response.clone().json(); if (typeof b?.error?.message === 'string') message = b.error.message;} catch {/* non-JSON error */}
     message = message.split(key).join('[redacted]').split(encodeURIComponent(key)).join('[redacted]');
     console.error(`Google STT failed [${response.status}]: ${message}`);
-    return Response.json({error: `Speech recognition failed (${response.status}).`, googleStatus: response.status}, {status: response.status === 429 ? 429 : 502});
+    return Response.json({error: `Speech recognition failed (${response.status}).`, googleStatus: response.status, detail: message}, {status: response.status === 429 ? 429 : 502});
   }
   let transcript = '';
   try {
