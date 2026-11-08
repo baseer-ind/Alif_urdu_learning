@@ -9,7 +9,7 @@ const browserRecognition=()=>{const w=window as SpeechWindow;return w.SpeechReco
 // Shared by the original exercise and stories. Grades a reading two ways: cloud
 // Google speech-to-text first (works on any device when the server key is set),
 // falling back to the browser recognizer. Both feed one alignment path.
-export function useReadAloud(urdu:string,onPerfect:()=>void) {
+export function useReadAloud(urdu:string,onPerfect:()=>void,onPace?:()=>void) {
  const [transcript,setTranscript]=useState<string|null>(null);
  const [supported,setSupported]=useState<boolean|null>(null);
  const [listening,setListening]=useState(false);
@@ -21,6 +21,7 @@ export function useReadAloud(urdu:string,onPerfect:()=>void) {
  const timer=useRef<ReturnType<typeof setTimeout>|null>(null);
  const clearTimer=()=>{if(timer.current){clearTimeout(timer.current);timer.current=null;}};
  const callback=useRef(onPerfect);callback.current=onPerfect;
+ const pace=useRef(onPace);pace.current=onPace;
  useEffect(()=>{setSupported(cloudSttSupported()||Boolean(browserRecognition()));return()=>{active.current=false;clearTimer();cloud.current?.stop();if(ref.current){ref.current.onend=null;ref.current.onerror=null;ref.current.onresult=null;ref.current.abort();}};},[]);
 
  // Shared scoring for whichever path produced the transcript.
@@ -49,6 +50,7 @@ export function useReadAloud(urdu:string,onPerfect:()=>void) {
     onTranscript:text=>{cloud.current=null;if(!active.current)return;if(!text.trim())setDetail('cloud reached Google but heard no words');score(text);},
     onUnavailable:reason=>{cloud.current=null;setDetail('cloud unavailable: '+reason);if(active.current)startBrowser();},
     onError:reason=>{cloud.current=null;setDetail('cloud error: '+reason);active.current=false;setListening(false);setError(true);},
+    onPace:()=>pace.current?.(),
    });
   }else{setDetail('cloud not supported on this browser');startBrowser();}
  };

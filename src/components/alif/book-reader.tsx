@@ -114,16 +114,17 @@ export function BookReader({story}:{story:Story}) {
 
   // Mic read-along (Urdu only — reuses the app's tested recognition + alignment).
   const pageUrdu=current.lines.map(l=>l.ur).join(' ');
-  const {supported,listening,error,transcript,result,start,stop}=useReadAloud(pageUrdu,finishPage);
+  // onPace advances the highlight live, word by word, as the mic hears you speak.
+  const {supported,listening,error,transcript,result,start,stop}=useReadAloud(pageUrdu,finishPage,()=>{if(lang==='ur')setCur(c=>Math.min(c+1,words.length));});
   // After a read, advance the highlight to how far the reader got right and show
   // a score, instead of only reacting to a flawless full-page read.
   useEffect(()=>{
     if(transcript===null||lang!=='ur'||!result)return;
     let got=0;for(const ok of result.correct){if(ok)got++;else break;}
     setSpoken({got,total:result.total});
-    setCur(Math.min(got,words.length));
+    setCur(c=>Math.max(c,Math.min(got,words.length))); // never snap backward after live pacing
   },[transcript]); // eslint-disable-line react-hooks/exhaustive-deps
-  const beginRead=()=>{setSpoken(null);start();};
+  const beginRead=()=>{setSpoken(null);setCur(0);start();};
 
   if (finished) return (
     <div className="story-completion">

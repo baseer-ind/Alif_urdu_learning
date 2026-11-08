@@ -31,6 +31,7 @@ export type CloudHandlers = {
   onTranscript: (text: string) => void;   // recognized (possibly empty) text
   onUnavailable: (reason: string) => void; // cloud can't be used — fall back to the browser recognizer
   onError: (reason: string) => void;       // mic blocked / recording failed — surface an error
+  onPace?: () => void;                     // fires on each spoken word, for live word-by-word highlighting
   maxMs?: number;
 };
 
@@ -43,10 +44,39 @@ export function startCloudRecognition(h: CloudHandlers): {stop: () => void} {
   }
   let recorder: MediaRecorder | undefined;
   let stream: MediaStream | undefined;
+  let ctx: AudioContext | undefined;
   let stopped = false;
   let timer: ReturnType<typeof setTimeout> | undefined;
   const chunks: BlobPart[] = [];
-  const cleanup = () => {clearTimeout(timer); stream?.getTracks().forEach(t => t.stop());};
+  const cleanup = () => {clearTimeout(timer); try {ctx?.close();} catch {/* ignore */} stream?.getTracks().forEach(t => t.stop());};
+  // Live word-by-word pacing: advance one word each time the mic hears speech start.
+  const startPace = (s: MediaStream) => {
+    try {
+      const AC = (window.AudioContext ?? (window as unknown as {webkitAudioContext?: typeof AudioContext}).webkitAudioContext);
+      if (!AC) return;
+      ctx = new AC();
+      void ctx.resume?.();
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 512;
+      ctx.createMediaStreamSource(s).connect(analyser);
+      const buf = new Uint8Array(analyser.fftSize);
+      let noise = 0.015, speaking = false, last = 0;
+      const tick = () => {
+        if (stopped || !ctx || ctx.state === 'closed') return;
+        analyser.getByteTimeDomainData(buf);
+        let sum = 0;
+        for (let i = 0; i < buf.length; i++) {const v = (buf[i]! - 128) / 128; sum += v * v;}
+        const rms = Math.sqrt(sum / buf.length);
+        noise = noise * 0.995 + rms * 0.005;
+        const hi = Math.max(0.045, noise * 3.2);
+        const now = performance.now();
+        if (!speaking && rms > hi) {speaking = true; if (now - last > 170) {last = now; h.onPace?.();}}
+        else if (speaking && rms < hi * 0.55) {speaking = false;}
+        requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    } catch {/* pace tracking is optional */}
+  };
   const stop = () => {
     if (stopped) return;
     stopped = true;
@@ -58,6 +88,7 @@ export function startCloudRecognition(h: CloudHandlers): {stop: () => void} {
   navigator.mediaDevices.getUserMedia({audio: true}).then(s => {
     stream = s;
     if (stopped) {cleanup(); return;}
+    if (h.onPace) startPace(s);
     try {recorder = new MediaRecorder(s, {mimeType: picked.mime});}
     catch {cleanup(); h.onUnavailable('recorder-init'); return;}
     recorder.ondataavailable = e => {if (e.data.size) chunks.push(e.data);};
