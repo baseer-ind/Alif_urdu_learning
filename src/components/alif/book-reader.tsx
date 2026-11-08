@@ -1,11 +1,10 @@
 import {useEffect,useMemo,useRef,useState} from 'react';
 import {Link} from '@tanstack/react-router';
-import {ArrowLeft,ArrowRight,Mic,Square,Trophy,Volume2} from 'lucide-react';
+import {ArrowLeft,ArrowRight,Play,Square,Trophy,Volume2} from 'lucide-react';
 import {Button} from '@/components/ui/button';
 import {Mascot} from '@/components/alif/shell';
 import {StoryArt} from '@/lib/story-art';
 import {useProgress,celebrate} from '@/lib/progress';
-import {useReadAloud} from '@/hooks/use-read-aloud';
 import {playUrduAudio} from '@/lib/urdu-audio';
 import {requestUrduAudio} from '@/lib/urdu-tts-client';
 import {award,localDate} from '@/lib/learning';
@@ -39,13 +38,17 @@ export function BookReader({story}:{story:Story}) {
   const [playing,setPlaying]=useState(false); // Listen karaoke in progress
   const playingRef=useRef(false);
   const audioRef=useRef<HTMLAudioElement|null>(null);
+  const [reading,setReading]=useState(false); // read-along walk in progress
+  const [speed,setSpeed]=useState<'slow'|'normal'|'fast'>('normal');
+  const readRef=useRef<ReturnType<typeof setInterval>|null>(null);
+  const STEP={slow:950,normal:650,fast:430}; // ms per word
 
   const current=book[page]!;
-  const [spoken,setSpoken]=useState<{got:number;total:number}|null>(null);
   const words=useMemo(()=>current.lines.flatMap(l=>(lang==='ur'?l.ur:l.en).split(/\s+/).filter(Boolean)),[current,lang]);
   const stopKaraoke=()=>{playingRef.current=false;setPlaying(false);try{audioRef.current?.pause();window.speechSynthesis?.cancel();}catch{/* audio is optional */}};
-  useEffect(()=>{setCur(0);setSpoken(null);stopKaraoke();},[page,lang]); // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(()=>()=>stopKaraoke(),[]); // stop on unmount
+  const stopReadAlong=()=>{if(readRef.current){clearInterval(readRef.current);readRef.current=null;}setReading(false);};
+  useEffect(()=>{setCur(0);stopKaraoke();stopReadAlong();},[page,lang]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(()=>()=>{stopKaraoke();stopReadAlong();},[]); // stop on unmount
 
   const completePage=(idx:number)=>setProgress(p=>{
     let next=award(p,bookPageTask(story.id,idx),20);
@@ -102,7 +105,7 @@ export function BookReader({story}:{story:Story}) {
     // Unlock audio inside the tap so mobile allows the chained clips.
     const a=audioRef.current ?? (audioRef.current=new Audio());
     try{a.play().catch(()=>{});}catch{/* unlock best-effort */}
-    playingRef.current=true;setPlaying(true);setSpoken(null);
+    playingRef.current=true;setPlaying(true);
     for(let i=0;i<words.length;i++){
       if(!playingRef.current)break;
       setCur(i);
@@ -112,19 +115,18 @@ export function BookReader({story}:{story:Story}) {
     playingRef.current=false;setPlaying(false);
   };
 
-  // Mic read-along (Urdu only — reuses the app's tested recognition + alignment).
-  const pageUrdu=current.lines.map(l=>l.ur).join(' ');
-  // onPace advances the highlight live, word by word, as the mic hears you speak.
-  const {supported,listening,error,transcript,result,start,stop}=useReadAloud(pageUrdu,finishPage,()=>{if(lang==='ur')setCur(c=>Math.min(c+1,words.length));});
-  // After a read, advance the highlight to how far the reader got right and show
-  // a score, instead of only reacting to a flawless full-page read.
-  useEffect(()=>{
-    if(transcript===null||lang!=='ur'||!result)return;
-    let got=0;for(const ok of result.correct){if(ok)got++;else break;}
-    setSpoken({got,total:result.total});
-    setCur(c=>Math.max(c,Math.min(got,words.length))); // never snap backward after live pacing
-  },[transcript]); // eslint-disable-line react-hooks/exhaustive-deps
-  const beginRead=()=>{setSpoken(null);setCur(0);start();};
+  // Read along: walk the highlight word by word at the chosen pace, for the
+  // learner to read with. Reliable on every device (no mic needed).
+  const readAlong=()=>{
+    if(reading){stopReadAlong();return;}
+    stopKaraoke();
+    let i=0;setCur(0);setReading(true);
+    readRef.current=setInterval(()=>{
+      i++;
+      if(i>words.length-1){stopReadAlong();finishPage();return;}
+      setCur(i);
+    },STEP[speed]);
+  };
 
   if (finished) return (
     <div className="story-completion">
@@ -160,12 +162,15 @@ export function BookReader({story}:{story:Story}) {
           </div>
           <div className="book-controls">
             <Button variant="outline" onClick={listenPage} aria-pressed={playing} aria-label="Listen to page">{playing?<Square size={17}/>:<Volume2 size={17}/>}{playing?'Stop':'Listen'}</Button>
-            {supported!==false
-              ? <Button variant="learn" onClick={listening?stop:beginRead} aria-pressed={listening} aria-label="Read aloud">{listening?<Square size={17}/>:<Mic size={17}/>}{listening?'Listening…':'Read aloud'}</Button>
-              : <span className="book-nomic">🎤 Mic unavailable</span>}
+            <Button variant="learn" onClick={readAlong} aria-pressed={reading} aria-label="Read along">{reading?<Square size={17}/>:<Play size={17}/>}{reading?'Stop':'Read along'}</Button>
           </div>
-          {spoken && !error && <p className="book-hint">{spoken.got>=spoken.total?'Perfect! 🎉':`You read ${spoken.got} / ${spoken.total} words — tap a word to hear it, then try again.`}</p>}
-          {error && <p className="book-hint">Didn’t catch that — tap each word to hear it and read along.</p>}
+          <div className="book-speed" role="group" aria-label="Reading pace">
+            <span>Pace</span>
+            {(['slow','normal','fast'] as const).map(s=>(
+              <button key={s} type="button" className={`book-speed-btn ${speed===s?'on':''}`} aria-pressed={speed===s} onClick={()=>setSpeed(s)}>{s==='slow'?'Slow':s==='normal'?'Normal':'Fast'}</button>
+            ))}
+          </div>
+          <p className="book-hint">Tap any word to hear it. Tap <strong>Read along</strong> and the words light up at your pace.</p>
           <div className="book-nav">
             <Button variant="outline" aria-label={t(storyCopy.previous)} disabled={page===0} onClick={()=>setPage(p=>p-1)}><ArrowLeft/></Button>
             <div className="book-dots">{book.map((_,i)=>(
