@@ -41,7 +41,7 @@ export function BookReader({story}:{story:Story}) {
   const [reading,setReading]=useState(false); // read-along walk in progress
   const [speed,setSpeed]=useState<'slow'|'normal'|'fast'>('normal');
   const readRef=useRef<ReturnType<typeof setInterval>|null>(null);
-  const STEP={slow:950,normal:650,fast:430}; // ms per word
+  const STEP={slow:950,normal:620,fast:300}; // ms per word
 
   const current=book[page]!;
   const words=useMemo(()=>current.lines.flatMap(l=>(lang==='ur'?l.ur:l.en).split(/\s+/).filter(Boolean)),[current,lang]);
